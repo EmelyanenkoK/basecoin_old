@@ -192,6 +192,13 @@
         return ();
     }
 
+    if (op == op::drop_admin) { ;; copy from notcoin
+        throw_unless(error::not_owner, equal_slices_bits(sender_address, admin_address));
+        in_msg_body.end_parse();
+        save_data(total_supply, address_none(), address_none(), jetton_wallet_code, metadata_uri);
+        return ();
+    }
+
     if (op == op::top_up) {
         return (); ;; just accept tons
     }
