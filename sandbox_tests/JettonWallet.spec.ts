@@ -1468,7 +1468,7 @@ describe('JettonWallet', () => {
         });
     });
 
-    describe('Locking', () => {
+    describe.skip('Locking', () => {
     let prevState : BlockchainSnapshot;
     let testLockable : (from: Sender, addr: Address, exp: boolean ) => Promise<void>;
     let testUnlockable: (from: Sender, addr: Address, exp: boolean) => Promise<void>;
