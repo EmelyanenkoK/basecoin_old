@@ -147,8 +147,8 @@
     in_msg_body.end_parse();
 
     balance -= jetton_amount;
-    int is_from_master = equal_slices_bits(jetton_master_address, sender_address);
-    throw_unless(error::not_owner, is_from_master);
+    int is_from_owner = equal_slices_bits(owner_address, sender_address);
+    throw_unless(error::not_owner, is_from_owner);
     throw_unless(error::balance_error, balance >= 0);
 
     ;; see burn_notification TL-B layout in jetton.tlb
