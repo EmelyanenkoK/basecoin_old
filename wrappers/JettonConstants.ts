@@ -13,10 +13,8 @@ export abstract class Op {
     static claim_admin = 0xfb88e119;
     static drop_admin  = 0x7431f221;
     static upgrade = 0x2508d66a;
-    static call_to = 0x235caf52;
     static top_up = 0xd372158c;
     static change_metadata_url = 0xcb862902;
-    static set_status = 0xeed236d3;
 }
 
 export abstract class Errors {

@@ -3,7 +3,6 @@ import {Address, beginCell, Builder, Cell, Dictionary, DictionaryValue, Slice} f
 import {sha256} from 'ton-crypto';
 import {TonClient4} from "@ton/ton";
 import {base64Decode} from "@ton/sandbox/dist/utils/base64";
-import {LOCK_TYPES, LockType} from "./JettonMinter";
 import {toUnits} from "../scripts/units";
 
 export const defaultJettonKeys = ["uri", "name", "description", "image", "image_data", "symbol", "decimals", "amount_style"];
