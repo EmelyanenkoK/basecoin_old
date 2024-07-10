@@ -4,7 +4,7 @@ import { compile, NetworkProvider, UIProvider} from '@ton/blueprint';
 import { JettonMinter, jettonMinterConfigCellToConfig, JettonMinterConfigFull, jettonMinterConfigFullToCell } from '../wrappers/JettonMinter';
 import { promptBool, promptAmount, promptAddress, displayContentCell, getLastBlock, waitForTransaction, getAccountLastTx, promptToncoin, promptUrl, jettonWalletCodeFromLibrary } from '../wrappers/ui-utils';
 import {TonClient4} from "@ton/ton";
-import { fromUnits } from './units';
+import { fromUnits } from '../wrappers/units';
 let jettonMinterContract:OpenedContract<JettonMinter>;
 
 const adminActions  = ['Mint', 'Change admin', 'Drop admin', 'Change metadata', 'Upgrade' ];

@@ -10,7 +10,7 @@ import {
 import {Address, Cell, fromNano, OpenedContract} from "@ton/core";
 import {JettonMinter, parseJettonMinterData} from "../wrappers/JettonMinter";
 import {NetworkProvider, UIProvider} from "@ton/blueprint";
-import {fromUnits} from "./units";
+import {fromUnits} from "../wrappers/units";
 
 export const checkJettonMinter = async (
     jettonMinterAddress: {

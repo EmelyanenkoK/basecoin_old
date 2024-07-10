@@ -3,7 +3,7 @@ import {Address, beginCell, Builder, Cell, Dictionary, DictionaryValue, Slice} f
 import {sha256} from 'ton-crypto';
 import {TonClient4} from "@ton/ton";
 import {base64Decode} from "@ton/sandbox/dist/utils/base64";
-import {toUnits} from "../scripts/units";
+import {toUnits} from "./units";
 
 export const defaultJettonKeys = ["uri", "name", "description", "image", "image_data", "symbol", "decimals", "amount_style"];
 export const defaultNftKeys = ["uri", "name", "description", "image", "image_data"];

@@ -10,7 +10,7 @@ import {
 } from "../wrappers/ui-utils";
 import {JettonWallet, parseJettonWalletData} from "../wrappers/JettonWallet";
 import {JettonMinter} from "../wrappers/JettonMinter";
-import {fromUnits} from "./units";
+import {fromUnits} from "../wrappers/units";
 
 export const checkJettonWallet = async (
     jettonWalletAddress: {
