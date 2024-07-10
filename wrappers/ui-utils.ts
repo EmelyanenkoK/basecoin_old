@@ -192,32 +192,6 @@ export const promptUserFriendlyAddress = async (prompt: string, provider: UIProv
     } while (true);
 }
 
-export const lockTypeToName = (lockType: LockType): string => {
-    switch (lockType) {
-        case 'unlock':
-            return "Unlocked";
-        case 'out':
-            return "Can't send";
-        case 'in':
-            return "Can't receive";
-        case 'full':
-            return "Can't send and receive";
-        default:
-            throw new Error("Invalid argument!");
-    }
-}
-
-export const promptLockType = async (prompt: string, provider: UIProvider): Promise<LockType> => {
-    do {
-        const s = await provider.input(prompt);
-        if (LOCK_TYPES.indexOf(s) === -1) {
-            provider.write(s + " is not valid!\n");
-        } else {
-            return s as LockType;
-        }
-    } while (true);
-}
-
 export const addressToString = (address: {
     isBounceable: boolean,
     isTestOnly: boolean,
