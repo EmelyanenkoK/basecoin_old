@@ -64,7 +64,13 @@ export const checkJettonMinter = async (
     const getData = await jettonMinterContract.getJettonData();
 
     assert(getData.totalSupply === parsedData.supply, "Total supply doesn't match", ui);
-    assert(getData.adminAddress.equals(parsedData.admin), "Admin address doesn't match", ui);
+    if(parsedData.admin === null) {
+        assert(getData.adminAddress === null, "Admin address doesn't match", ui);
+    }
+    else {
+        assert(getData.adminAddress!.equals(parsedData.admin), "Admin address doesn't match", ui);
+    }
+
 
     let decimals: number;
     const parsedContent = await parseContentCell(getData.content);
