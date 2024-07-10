@@ -290,6 +290,29 @@ export class JettonMinter implements Contract {
         })
     }
 
+    static dropAdminMessage(query_id: number | bigint) {
+        return beginCell().storeUint(Op.drop_admin, 32).storeUint(query_id, 64).endCell();
+    }
+    static parseDropAdmin(slice: Slice) {
+        const op = slice.loadUint(32);
+        if(op !== Op.drop_admin) {
+            throw new Error("Invalid op");
+        }
+        const queryId = slice.loadUint(64);
+        endParse(slice);
+        return {
+            queryId
+        }
+    }
+    async sendDropAdmin(provider: ContractProvider, via: Sender, value: bigint = toNano('0.05'), query_id: number | bigint = 0) {
+        await provider.internal(via, {
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: JettonMinter.dropAdminMessage(query_id),
+            value
+        });
+    }
+
+
     static changeContentMessage(content: Cell | JettonMinterContent) {
         const contentString = content instanceof Cell ? content.beginParse().loadStringTail() : content.uri;
         return beginCell().storeUint(Op.change_metadata_url, 32).storeUint(0, 64) // op, queryId
@@ -513,7 +536,7 @@ export class JettonMinter implements Contract {
         let res = await provider.get('get_jetton_data', []);
         let totalSupply = res.stack.readBigNumber();
         let mintable = res.stack.readBoolean();
-        let adminAddress = res.stack.readAddress();
+        let adminAddress = res.stack.readAddressOpt();
         let content = res.stack.readCell();
         let walletCode = res.stack.readCell();
         return {
