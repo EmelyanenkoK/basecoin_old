@@ -1,6 +1,6 @@
 import {compile, NetworkProvider} from '@ton/blueprint';
 import {jettonWalletCodeFromLibrary, promptUserFriendlyAddress} from "../wrappers/ui-utils";
-import {checkJettonWallet} from "./JettonWalletChecker";
+import {checkJettonWallet} from "../wrappers/JettonWalletChecker";
 
 export async function run(provider: NetworkProvider) {
     const isTestnet = provider.network() !== 'mainnet';

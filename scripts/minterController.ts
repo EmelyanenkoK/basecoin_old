@@ -1,4 +1,4 @@
-import { checkJettonMinter } from './JettonMinterChecker';
+import { checkJettonMinter } from '../wrappers/JettonMinterChecker';
 import { Address, beginCell, Cell, fromNano, OpenedContract, toNano } from '@ton/core';
 import { compile, NetworkProvider, UIProvider} from '@ton/blueprint';
 import { JettonMinter, jettonMinterConfigCellToConfig, JettonMinterConfigFull, jettonMinterConfigFullToCell } from '../wrappers/JettonMinter';
