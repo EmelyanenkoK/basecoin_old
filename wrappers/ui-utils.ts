@@ -3,8 +3,7 @@ import {Address, beginCell, Builder, Cell, Dictionary, DictionaryValue, Slice} f
 import {sha256} from 'ton-crypto';
 import {TonClient4} from "@ton/ton";
 import {base64Decode} from "@ton/sandbox/dist/utils/base64";
-import {LOCK_TYPES, LockType} from "./JettonMinter";
-import {toUnits} from "../scripts/units";
+import {toUnits} from "./units";
 
 export const defaultJettonKeys = ["uri", "name", "description", "image", "image_data", "symbol", "decimals", "amount_style"];
 export const defaultNftKeys = ["uri", "name", "description", "image", "image_data"];
@@ -189,32 +188,6 @@ export const promptUserFriendlyAddress = async (prompt: string, provider: UIProv
         } else {
             provider.write(s + " is not valid!\n");
             prompt = "Please try again:";
-        }
-    } while (true);
-}
-
-export const lockTypeToName = (lockType: LockType): string => {
-    switch (lockType) {
-        case 'unlock':
-            return "Unlocked";
-        case 'out':
-            return "Can't send";
-        case 'in':
-            return "Can't receive";
-        case 'full':
-            return "Can't send and receive";
-        default:
-            throw new Error("Invalid argument!");
-    }
-}
-
-export const promptLockType = async (prompt: string, provider: UIProvider): Promise<LockType> => {
-    do {
-        const s = await provider.input(prompt);
-        if (LOCK_TYPES.indexOf(s) === -1) {
-            provider.write(s + " is not valid!\n");
-        } else {
-            return s as LockType;
         }
     } while (true);
 }

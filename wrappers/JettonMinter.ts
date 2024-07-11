@@ -9,7 +9,6 @@ import {
     SendMode, Slice,
     toNano
 } from '@ton/core';
-import {JettonWallet} from './JettonWallet';
 import {Op} from './JettonConstants';
 
 export type JettonMinterContent = {
@@ -27,40 +26,6 @@ export type JettonMinterConfigFull = {
     transfer_admin: Address | null,
     wallet_code: Cell,
     jetton_content: Cell | JettonMinterContent
-}
-
-export type LockType = 'unlock' | 'out' | 'in' | 'full';
-
-export const LOCK_TYPES = ['unlock', 'out', 'in', 'full'];
-
-export const lockTypeToInt = (lockType: LockType): number => {
-    switch (lockType) {
-        case 'unlock':
-            return 0;
-        case 'out':
-            return 1;
-        case 'in':
-            return 2;
-        case 'full':
-            return 3;
-        default:
-            throw new Error("Invalid argument!");
-    }
-}
-
-export const intToLockType = (lockType: number): LockType => {
-    switch (lockType) {
-        case 0:
-            return 'unlock';
-        case 1:
-            return 'out';
-        case 2:
-            return 'in';
-        case 3:
-            return 'full';
-        default:
-            throw new Error("Invalid argument!");
-    }
 }
 
 export function endParse(slice: Slice) {
@@ -290,6 +255,29 @@ export class JettonMinter implements Contract {
         })
     }
 
+    static dropAdminMessage(query_id: number | bigint) {
+        return beginCell().storeUint(Op.drop_admin, 32).storeUint(query_id, 64).endCell();
+    }
+    static parseDropAdmin(slice: Slice) {
+        const op = slice.loadUint(32);
+        if(op !== Op.drop_admin) {
+            throw new Error("Invalid op");
+        }
+        const queryId = slice.loadUint(64);
+        endParse(slice);
+        return {
+            queryId
+        }
+    }
+    async sendDropAdmin(provider: ContractProvider, via: Sender, value: bigint = toNano('0.05'), query_id: number | bigint = 0) {
+        await provider.internal(via, {
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: JettonMinter.dropAdminMessage(query_id),
+            value
+        });
+    }
+
+
     static changeContentMessage(content: Cell | JettonMinterContent) {
         const contentString = content instanceof Cell ? content.beginParse().loadStringTail() : content.uri;
         return beginCell().storeUint(Op.change_metadata_url, 32).storeUint(0, 64) // op, queryId
@@ -317,74 +305,6 @@ export class JettonMinter implements Contract {
         });
     }
 
-    static lockWalletMessage(lock_address: Address, lock: number, amount: bigint, query_id: bigint | number = 0) {
-        return beginCell().storeUint(Op.call_to, 32).storeUint(query_id, 64)
-            .storeAddress(lock_address)
-            .storeCoins(amount)
-            .storeRef(beginCell().storeUint(Op.set_status, 32).storeUint(query_id, 64).storeUint(lock, 4).endCell())
-            .endCell();
-    }
-
-    static parseSetStatus(slice: Slice) {
-        const op = slice.loadUint(32);
-        if (op !== Op.set_status) throw new Error('Invalid op');
-        const queryId = slice.loadUint(64);
-        const newStatus = slice.loadUint(4);
-        endParse(slice);
-        return {
-            queryId,
-            newStatus
-        }
-    }
-
-    static parseCallTo(slice: Slice, refPrser: (slice: Slice) => any) {
-        const op = slice.loadUint(32);
-        if (op !== Op.call_to) throw new Error('Invalid op');
-        const queryId = slice.loadUint(64);
-        const toAddress = slice.loadAddress();
-        const tonAmount = slice.loadCoins();
-        const ref = slice.loadRef();
-        endParse(slice);
-        return {
-            queryId,
-            toAddress,
-            tonAmount,
-            action: refPrser(ref.beginParse())
-        }
-    }
-
-    async sendLockWallet(provider: ContractProvider, via: Sender, lock_address: Address, lock: LockType, amount: bigint = toNano('0.1'), query_id: bigint | number = 0) {
-        const lockCmd: number = lockTypeToInt(lock);
-
-        await provider.internal(via, {
-            sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: JettonMinter.lockWalletMessage(lock_address, lockCmd, amount, query_id),
-            value: amount + toNano('0.1')
-        });
-    }
-
-    static forceTransferMessage(transfer_amount: bigint,
-                                to: Address,
-                                from: Address,
-                                custom_payload: Cell | null,
-                                forward_amount: bigint = 0n,
-                                forward_payload: Cell | null,
-                                value: bigint = toNano('0.1'),
-                                query_id: bigint = 0n) {
-
-        const transferMessage = JettonWallet.transferMessage(transfer_amount,
-            to,
-            to,
-            custom_payload,
-            forward_amount,
-            forward_payload);
-        return beginCell().storeUint(Op.call_to, 32).storeUint(query_id, 64)
-            .storeAddress(from)
-            .storeCoins(value)
-            .storeRef(transferMessage)
-            .endCell();
-    }
-
     static parseTransfer(slice: Slice) {
         const op = slice.loadUint(32);
         if (op !== Op.transfer) throw new Error('Invalid op');
@@ -407,41 +327,6 @@ export class JettonMinter implements Contract {
         }
     }
 
-    async sendForceTransfer(provider: ContractProvider,
-                            via: Sender,
-                            transfer_amount: bigint,
-                            to: Address,
-                            from: Address,
-                            custom_payload: Cell | null,
-                            forward_amount: bigint = 0n,
-                            forward_payload: Cell | null,
-                            value: bigint = toNano('0.1'),
-                            query_id: bigint = 0n) {
-        await provider.internal(via, {
-            sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: JettonMinter.forceTransferMessage(transfer_amount,
-                to, from,
-                custom_payload,
-                forward_amount,
-                forward_payload,
-                value, query_id),
-            value: value + toNano('0.1')
-        });
-    }
-
-    static forceBurnMessage(burn_amount: bigint,
-                            to: Address,
-                            response: Address | null,
-                            value: bigint = toNano('0.1'),
-                            query_id: bigint | number = 0) {
-
-        return beginCell().storeUint(Op.call_to, 32).storeUint(query_id, 64)
-            .storeAddress(to)
-            .storeCoins(value)
-            .storeRef(JettonWallet.burnMessage(burn_amount, response, null))
-            .endCell()
-    }
-
     static parseBurn(slice: Slice) {
         const op = slice.loadUint(32);
         if (op !== Op.burn) throw new Error('Invalid op');
@@ -456,20 +341,6 @@ export class JettonMinter implements Contract {
             responseAddress,
             customPayload,
         }
-    }
-    async sendForceBurn(provider: ContractProvider,
-                        via: Sender,
-                        burn_amount: bigint,
-                        address: Address,
-                        response: Address | null,
-                        value: bigint = toNano('0.1'),
-                        query_id: bigint | number = 0) {
-
-        await provider.internal(via, {
-            sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: JettonMinter.forceBurnMessage(burn_amount, address, response, value, query_id),
-            value: value + toNano('0.1')
-        });
     }
 
     static upgradeMessage(new_code: Cell, new_data: Cell, query_id: bigint | number = 0) {
@@ -513,7 +384,7 @@ export class JettonMinter implements Contract {
         let res = await provider.get('get_jetton_data', []);
         let totalSupply = res.stack.readBigNumber();
         let mintable = res.stack.readBoolean();
-        let adminAddress = res.stack.readAddress();
+        let adminAddress = res.stack.readAddressOpt();
         let content = res.stack.readCell();
         let walletCode = res.stack.readCell();
         return {

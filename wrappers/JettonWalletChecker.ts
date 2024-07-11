@@ -5,13 +5,12 @@ import {
     assert,
     base64toCell,
     formatAddressAndUrl,
-    lockTypeToName,
     parseContentCell,
     sendToIndex
 } from "../wrappers/ui-utils";
 import {JettonWallet, parseJettonWalletData} from "../wrappers/JettonWallet";
-import {intToLockType, JettonMinter} from "../wrappers/JettonMinter";
-import {fromUnits} from "./units";
+import {JettonMinter} from "../wrappers/JettonMinter";
+import {fromUnits} from "../wrappers/units";
 
 export const checkJettonWallet = async (
     jettonWalletAddress: {
@@ -82,8 +81,6 @@ export const checkJettonWallet = async (
     assert(getData.minter.equals(parsedData.jettonMasterAddress), "Jetton master address doesn't match", ui);
     assert(getData.wallet_code.equals(jettonWalletCode), "Jetton wallet code doesn't match", ui);
 
-    assert((await jettonWalletContract.getWalletStatus()) === parsedData.status, "Jetton wallet status doesn't match", ui);
-
     // StateInit
 
     const jettonWalletContract2 = JettonWallet.createFromConfig({
@@ -97,7 +94,7 @@ export const checkJettonWallet = async (
 
     // Print
 
-    write('Jetton-wallet status: ' + lockTypeToName(intToLockType(parsedData.status)));
+    write('Jetton-wallet status: ' + parsedData.status);
     write('Balance: ' + fromUnits(parsedData.balance, decimals));
     write('Owner address: ' + (await formatAddressAndUrl(parsedData.ownerAddress, provider, isTestnet)));
     write('Jetton-minter address: ' + (await formatAddressAndUrl(parsedData.jettonMasterAddress, provider, isTestnet)));
