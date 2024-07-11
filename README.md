@@ -1,5 +1,3 @@
-#### WIP: fees, tests and scripts are not updated yet
-
 # Base Jetton
 
 Made from [Jetton with governance(stablecoin)](https://github.com/ton-blockchain/stablecoin-contract) by removing governance functionality.
